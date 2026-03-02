@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>لوحة المخططات السريعة</title>
+    <style>
+        :root { --panel: #222; --accent: #3498db; }
+        body { margin: 0; overflow: hidden; background: #333; font-family: sans-serif; touch-action: none; }
+        
+        #toolbar {
+            position: fixed; top: 10px; left: 10px; right: 10px;
+            background: var(--panel); padding: 10px; border-radius: 15px;
+            display: flex; gap: 10px; align-items: center; justify-content: space-around;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 100;
+        }
+
+        .tool-btn { 
+            background: #444; border: none; color: white; padding: 10px; 
+            border-radius: 8px; font-size: 1.2rem; cursor: pointer; flex: 1;
+        }
+        
+        .tool-btn:active { background: var(--accent); }
+
+        input[type="color"] { border: none; width: 40px; height: 40px; background: none; }
+
+        canvas { display: block; background: white; cursor: crosshair; }
+        
+        #sizeDisplay { color: white; font-size: 0.8rem; min-width: 30px; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div id="toolbar">
+    <input type="color" id="colorPicker" value="#000000">
+    
+    <button class="tool-btn" onclick="setMode('draw')">✏️</button>
+    <button class="tool-btn" onclick="setMode('erase')">🧽</button>
+    
+    <div style="display:flex; flex-direction:column; align-items:center;">
+        <input type="range" id="sizePicker" min="1" max="20" value="3">
+        <span id="sizeDisplay">3px</span>
+    </div>
+
+    <button class="tool-btn" onclick="clearCanvas()" style="background:#c0392b;">🗑️</button>
+    <button class="tool-btn" onclick="saveSketch()" style="background:#27ae60;">💾</button>
+</div>
+
+<canvas id="paintCanvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('paintCanvas');
+    const ctx = canvas.getContext('2d');
+    const colorPicker = document.getElementById('colorPicker');
+    const sizePicker = document.getElementById('sizePicker');
+    const sizeDisplay = document.getElementById('sizeDisplay');
+
+    let drawing = false;
+    let mode = 'draw';
+
+    // ضبط حجم الكانفاس ليملأ الشاشة
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        ctx.lineCap = 'round';
+        ctx.lineJoin = 'round';
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    // أحداث اللمس (Touch Events)
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchend', stopDrawing);
+    canvas.addEventListener('touchmove', draw);
+
+    // أحداث الماوس للكمبيوتر
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mousemove', draw);
+
+    function startDrawing(e) {
+        drawing = true;
+        draw(e);
+    }
+
+    function stopDrawing() {
+        drawing = false;
+        ctx.beginPath();
+    }
+
+    function draw(e) {
+        if (!drawing) return;
+        
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+        const y = (e.touches ? e.touches[0].clientY : e.clientY) - rect.top;
+
+        ctx.lineWidth = sizePicker.value;
+        ctx.strokeStyle = mode === 'erase' ? '#white' : colorPicker.value;
+        if (mode === 'erase') {
+            ctx.globalCompositeOperation = 'destination-out';
+        } else {
+            ctx.globalCompositeOperation = 'source-over';
+        }
+
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    }
+
+    function setMode(newMode) {
+        mode = newMode;
+        if (navigator.vibrate) navigator.vibrate(20);
+    }
+
+    function clearCanvas() {
+        if (confirm('هل تريد مسح المخطط بالكامل؟')) {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+    }
+
+    function saveSketch() {
+        const link = document.createElement('a');
+        link.download = 'Arch-Sketch.png';
+        link.href = canvas.toDataURL();
+        link.click();
+    }
+
+    sizePicker.oninput = () => sizeDisplay.innerText = sizePicker.value + 'px';
+</script>
+
+</body>
+</html>

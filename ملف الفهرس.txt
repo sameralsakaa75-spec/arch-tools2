@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ArchToolbox | حقيبة المهندس</title>
+    <style>
+        :root {
+            --bg: #f0f2f5;
+            --card: #ffffff;
+            --primary: #2c3e50;
+            --accent: #3498db;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        header h1 { color: var(--primary); margin: 0; font-size: 1.8rem; }
+        header p { color: #7f8c8d; font-size: 0.9rem; }
+
+        .tools-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .tool-card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 20px;
+            text-align: center;
+            text-decoration: none;
+            color: var(--primary);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            border: 1px solid #eee;
+        }
+
+        .tool-card:active {
+            transform: scale(0.95);
+            background: #f9f9f9;
+        }
+
+        .icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .tool-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            margin-top: 10px;
+            font-size: 0.7rem;
+            background: #e8f5e9;
+            color: #2e7d32;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🏗️ ArchToolbox</h1>
+    <p>مجموعة أدوات الهندسة المعمارية (Offline)</p>
+</header>
+
+<div class="tools-grid">
+    <!-- أداة المقاييس -->
+    <a href="scale.html" class="tool-card">
+        <span class="icon">📏</span>
+        <span class="tool-name">حاسبة المقاييس</span>
+        <span class="status-badge">جاهز</span>
+    </a>
+
+    <!-- أداة الألوان -->
+    <a href="color.html" class="tool-card">
+        <span class="icon">🎨</span>
+        <span class="tool-name">محلل الألوان</span>
+        <span class="status-badge">جاهز</span>
+    </a>
+
+    <!-- أداة استخراج الألوان -->
+    <a href="img-palette.html" class="tool-card">
+        <span class="icon">🖼️</span>
+        <span class="tool-name">باليتة الصور</span>
+        <span class="status-badge">جاهز</span>
+    </a>
+
+    <!-- أداة الرسم -->
+    <a href="sketch.html" class="tool-card">
+        <span class="icon">✏️</span>
+        <span class="tool-name">سكتش سريع</span>
+        <span class="status-badge">جاهز</span>
+    </a>
+
+    <!-- أداة المساحات -->
+    <a href="area-calc.html" class="tool-card">
+        <span class="icon">📐</span>
+        <span class="tool-name">حاسبة المساحات</span>
+        <span class="status-badge">جاهز</span>
+    </a>
+
+    <!-- أداة قادمة (مثال) -->
+    <div class="tool-card" style="opacity: 0.6; filter: grayscale(1);">
+        <span class="icon">🧱</span>
+        <span class="tool-name">حاسبة المواد</span>
+        <span class="status-badge" style="background:#eee; color:#666;">قريباً</span>
+    </div>
+</div>
+
+<script>
+    // لمسة جمالية: اهتزاز خفيف عند التنقل
+    document.querySelectorAll('.tool-card').forEach(card => {
+        card.addEventListener('click', () => {
+            if (navigator.vibrate) navigator.vibrate(20);
+        });
+    });
+</script>
+
+</body>
+</html>

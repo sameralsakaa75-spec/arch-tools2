@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة المقاييس المعمارية | ArchScale</title>
+    <style>
+        :root {
+            --primary: #2c3e50;
+            --accent: #e67e22;
+            --bg: #f4f7f6;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 450px;
+        }
+        h1 { color: var(--primary); text-align: center; font-size: 1.5rem; }
+        .input-group { margin-bottom: 1.5rem; }
+        label { display: block; margin-bottom: 0.5rem; color: #666; font-size: 0.9rem; }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+        input:focus { border-color: var(--accent); }
+        .result-box {
+            background: var(--primary);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .result-value { font-size: 2rem; font-weight: bold; color: var(--accent); display: block; }
+        .touch-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .touch-btn:active { transform: scale(0.98); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>📏 حاسبة المقاييس</h1>
+    
+    <div class="input-group">
+        <label>اختر المقياس (Scale):</label>
+        <select id="scaleSelect">
+            <option value="50">1:50</option>
+            <option value="100">1:100</option>
+            <option value="200">1:200</option>
+            <option value="20">1:20</option>
+            <option value="500">1:500</option>
+        </select>
+    </div>
+
+    <div class="input-group">
+        <label>المقاس على اللوحة (سم):</label>
+        <input type="number" id="drawingInput" placeholder="أدخل السنتيمترات..." inputmode="decimal">
+    </div>
+
+    <button class="touch-btn" onclick="calculate()">احسب الآن</button>
+
+    <div class="result-box">
+        <span id="realResult" class="result-value">0</span>
+        <span>متر في الواقع</span>
+    </div>
+</div>
+
+<script>
+    function calculate() {
+        const scale = document.getElementById('scaleSelect').value;
+        const drawingVal = document.getElementById('drawingInput').value;
+        
+        if(drawingVal) {
+            // المعادلة: (السنتيمترات * المقياس) / 100 للتحويل لمتر
+            const result = (parseFloat(drawingVal) * parseFloat(scale)) / 100;
+            document.getElementById('realResult').innerText = result.toLocaleString();
+            
+            // إضافة اهتزاز بسيط للمس (في حال كان الجهاز يدعم ذلك)
+            if (navigator.vibrate) navigator.vibrate(50);
+        }
+    }
+
+    // الحساب التلقائي أثناء الكتابة
+    document.getElementById('drawingInput').addEventListener('input', calculate);
+    document.getElementById('scaleSelect').addEventListener('change', calculate);
+</script>
+
+</body>
+</html>

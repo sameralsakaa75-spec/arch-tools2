@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محلل المسار الشمسي | Solar Arch</title>
+    <style>
+        :root { --sun: #f1c40f; --sky: #2980b9; --ground: #95a5a6; }
+        body { font-family: sans-serif; background: #ecf0f1; margin: 0; display: flex; flex-direction: column; align-items: center; padding: 20px; touch-action: manipulation; }
+        .card { background: white; width: 100%; max-width: 450px; border-radius: 25px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .sky-viz { width: 100%; height: 200px; background: linear-gradient(to bottom, var(--sky), #87ceeb); border-radius: 15px; position: relative; overflow: hidden; margin-bottom: 20px; border: 2px solid #ddd; }
+        .sun-disk { width: 40px; height: 40px; background: var(--sun); border-radius: 50%; position: absolute; box-shadow: 0 0 20px var(--sun); transition: 0.5s ease-out; }
+        .ground-line { position: absolute; bottom: 0; width: 100%; height: 40px; background: var(--ground); }
+        .controls { display: flex; flex-direction: column; gap: 15px; }
+        input[type="range"] { width: 100%; height: 10px; border-radius: 5px; background: #ddd; outline: none; -webkit-appearance: none; }
+        input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 25px; height: 25px; background: var(--sky); border-radius: 50%; cursor: pointer; }
+        .data-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; text-align: center; }
+        .data-item { background: #f9f9f9; padding: 10px; border-radius: 10px; border: 1px solid #eee; }
+        .label { font-size: 0.7rem; color: #7f8c8d; display: block; }
+        .value { font-weight: bold; color: #2c3e50; font-size: 1.1rem; }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2 style="text-align:center; margin-top:0;">☀️ محاكي المسار الشمسي</h2>
+    
+    <div class="sky-viz" id="sky">
+        <div class="sun-disk" id="sun"></div>
+        <div class="ground-line"></div>
+    </div>
+
+    <div class="controls">
+        <label>وقت اليوم (من الشروق للغروب):</label>
+        <input type="range" id="timeSlider" min="0" max="180" value="90">
+        
+        <label>فصل السنة (الميل الشمسي):</label>
+        <select id="seasonSelect" style="padding:10px; border-radius:8px;">
+            <option value="23.5">الانقلاب الصيفي (أقصى ارتفاع)</option>
+            <option value="0" selected>الاعتدال الخريفي/الربيعي</option>
+            <option value="-23.5">الانقلاب الشتوي (أدنى ارتفاع)</option>
+        </select>
+    </div>
+
+    <div class="data-grid">
+        <div class="data-item">
+            <span class="label">زاوية الارتفاع (Altitude)</span>
+            <span class="value" id="altVal">45°</span>
+        </div>
+        <div class="data-item">
+            <span class="label">طول الظل النسبي</span>
+            <span class="value" id="shadowVal">1.0x</span>
+        </div>
+    </div>
+</div>
+
+<script>
+    const sun = document.getElementById('sun');
+    const timeSlider = document.getElementById('timeSlider');
+    const seasonSelect = document.getElementById('seasonSelect');
+    const altVal = document.getElementById('altVal');
+    const shadowVal = document.getElementById('shadowVal');
+
+    function updateSolar() {
+        const angle = timeSlider.value; // من 0 إلى 180 درجة
+        const seasonOffset = parseFloat(seasonSelect.value);
+        
+        // حساب الإحداثيات البصرية للقرص الشمسي
+        const rad = angle * (Math.PI / 180);
+        const x = 90 - (Math.cos(rad) * 45); // تموضع أفقي بنسبة مئوية
+        const y = 80 - (Math.sin(rad) * 60 + (seasonOffset * 0.5)); // تموضع رأسي
+
+        sun.style.left = `${x}%`;
+        sun.style.top = `${y}%`;
+
+        // حساب زاوية الارتفاع الحقيقية (Altitude)
+        let altitude = Math.round(Math.sin(rad) * (90 + seasonOffset));
+        if (altitude < 0) altitude = 0;
+        altVal.innerText = `${altitude}°`;
+
+        // حساب طول الظل (Cotangent Altitude)
+        const shadowFactor = altitude > 0 ? (1 / Math.tan(altitude * Math.PI / 180)).toFixed(2) : "∞";
+        shadowVal.innerText = `${shadowFactor}x`;
+
+        // تغيير لون السماء بناءً على الوقت
+        const skyColor = `linear-gradient(to bottom, hsl(200, 70%, ${altitude + 20}%), #87ceeb)`;
+        document.getElementById('sky').style.background = skyColor;
+    }
+
+    timeSlider.addEventListener('input', updateSolar);
+    seasonSelect.addEventListener('change', updateSolar);
+    updateSolar(); // تشغيل أولي
+</script>
+
+</body>
+</html>

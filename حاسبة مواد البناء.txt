@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة مواد البناء | Estimator</title>
+    <style>
+        :root { --primary: #34495e; --accent: #27ae60; --bg: #f8f9fa; }
+        body { font-family: sans-serif; background: var(--bg); margin: 0; padding: 15px; display: flex; justify-content: center; }
+        .app-container { background: white; width: 100%; max-width: 450px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); overflow: hidden; }
+        .tabs { display: flex; background: var(--primary); }
+        .tab-btn { flex: 1; padding: 15px; border: none; background: none; color: #bdc3c7; cursor: pointer; font-weight: bold; transition: 0.3s; }
+        .tab-btn.active { color: white; background: rgba(255,255,255,0.1); border-bottom: 4px solid var(--accent); }
+        .content { padding: 20px; display: none; }
+        .content.active { display: block; }
+        .input-group { margin-bottom: 15px; }
+        label { display: block; font-size: 0.85rem; color: #666; margin-bottom: 5px; }
+        input { width: 100%; padding: 12px; border: 2px solid #eee; border-radius: 10px; font-size: 1rem; box-sizing: border-box; }
+        .result-card { background: #f1f8f4; border: 1px solid var(--accent); padding: 15px; border-radius: 12px; margin-top: 20px; }
+        .res-val { color: var(--accent); font-weight: bold; font-size: 1.2rem; }
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+    <div class="tabs">
+        <button class="tab-btn active" onclick="showTab('bricks')">🧱 طوب</button>
+        <button class="tab-btn" onclick="showTab('concrete')">🏗️ خرسانة</button>
+        <button class="tab-btn" onclick="showTab('paint')">🖌️ دهان</button>
+    </div>
+
+    <!-- حساب الطوب -->
+    <div id="bricks" class="content active">
+        <h3>حساب عدد الطوب</h3>
+        <div class="input-group">
+            <label>مساحة الجدار (م²):</label>
+            <input type="number" id="wallArea" placeholder="مثلاً: 20" oninput="calcBricks()">
+        </div>
+        <div class="input-group">
+            <label>حجم الطوبة (سم):</label>
+            <input type="text" value="20 × 10 × 40" disabled>
+        </div>
+        <div class="result-card">
+            العدد التقريبي: <span id="brickRes" class="res-val">0</span> طوبة
+            <br><small>(بناءً على مقاس 20x40 سم)</small>
+        </div>
+    </div>
+
+    <!-- حساب الخرسانة -->
+    <div id="concrete" class="content">
+        <h3>حجم الخرسانة (Slab)</h3>
+        <div class="input-group"><label>الطول (م):</label><input type="number" id="cLen" oninput="calcConcrete()"></div>
+        <div class="input-group"><label>العرض (م):</label><input type="number" id="cWidth" oninput="calcConcrete()"></div>
+        <div class="input-group"><label>السماكة (م):</label><input type="number" id="cThick" value="0.15" oninput="calcConcrete()"></div>
+        <div class="result-card">
+            الحجم المطلوب: <span id="conRes" class="res-val">0</span> م³
+        </div>
+    </div>
+
+    <!-- حساب الدهان -->
+    <div id="paint" class="content">
+        <h3>كمية الدهان</h3>
+        <div class="input-group"><label>مساحة الأسطح (م²):</label><input type="number" id="pArea" oninput="calcPaint()"></div>
+        <div class="result-card">
+            الكمية التقديرية: <span id="paintRes" class="res-val">0</span> لتر
+            <br><small>(وجهين - معدل 10م²/لتر)</small>
+        </div>
+    </div>
+</div>
+
+<script>
+    function showTab(tabId) {
+        document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        event.currentTarget.classList.add('active');
+        if (navigator.vibrate) navigator.vibrate(25);
+    }
+
+    function calcBricks() {
+        const area = document.getElementById('wallArea').value;
+        // حساب تقريبي: المتر المربع يحتاج 12.5 طوبة (مقاس 20x40)
+        document.getElementById('brickRes').innerText = Math.ceil(area * 12.5);
+    }
+
+    function calcConcrete() {
+        const l = document.getElementById('cLen').value || 0;
+        const w = document.getElementById('cWidth').value || 0;
+        const t = document.getElementById('cThick').value || 0;
+        document.getElementById('conRes').innerText = (l * w * t).toFixed(2);
+    }
+
+    function calcPaint() {
+        const area = document.getElementById('pArea').value || 0;
+        // حساب تقريبي: اللتر يغطي 5 متر مربع وجهين
+        document.getElementById('paintRes').innerText = (area / 5).toFixed(1);
+    }
+</script>
+
+</body>
+</html>

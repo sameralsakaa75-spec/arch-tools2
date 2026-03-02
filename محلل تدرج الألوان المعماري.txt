@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محلل التدرجات المعمارية</title>
+    <style>
+        :root { --main-bg: #1a1a1a; --card-bg: #2d2d2d; }
+        body { font-family: 'Segoe UI', sans-serif; background: var(--main-bg); color: white; margin: 0; padding: 20px; display: flex; justify-content: center; }
+        .container { width: 100%; max-width: 500px; background: var(--card-bg); padding: 25px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+        h1 { text-align: center; font-size: 1.4rem; color: #bbb; }
+        .picker-area { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 30px; }
+        input[type="color"] { -webkit-appearance: none; border: none; width: 120px; height: 120px; cursor: pointer; background: none; border-radius: 50%; overflow: hidden; }
+        input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+        input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; box-shadow: 0 0 15px rgba(255,255,255,0.2); }
+        .section-title { font-size: 0.9rem; margin-bottom: 10px; color: #888; border-right: 3px solid orange; padding-right: 10px; }
+        .palette-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; margin-bottom: 25px; }
+        .color-swatch { height: 60px; border-radius: 12px; cursor: pointer; transition: 0.2s; position: relative; }
+        .color-swatch:active { transform: scale(0.9); }
+        .hex-label { font-size: 0.6rem; position: absolute; bottom: -18px; width: 100%; text-align: center; color: #aaa; }
+        .info-card { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; text-align: center; font-family: monospace; border: 1px dashed #444; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🎨 محلل التناغم اللوني</h1>
+    
+    <div class="picker-area">
+        <label>المس الدائرة لاختيار اللون الأساسي</label>
+        <input type="color" id="baseColor" value="#e67e22">
+        <div class="info-card" id="hexDisplay">HEX: #E67E22</div>
+    </div>
+
+    <div class="section-title">التدرجات الظلية (Shades)</div>
+    <div class="palette-grid" id="shadesGrid"></div>
+
+    <div class="section-title">التناغم المتكامل (Complementary)</div>
+    <div class="palette-grid" id="compGrid"></div>
+
+    <div class="section-title">باليتة المود بورد (Architectural Mood)</div>
+    <div class="palette-grid" id="moodGrid"></div>
+</div>
+
+<script>
+    const baseInput = document.getElementById('baseColor');
+    
+    function generatePalette() {
+        const hex = baseInput.value;
+        document.getElementById('hexDisplay').innerText = `HEX: ${hex.toUpperCase()}`;
+        
+        // توليد التدرجات
+        renderGrid('shadesGrid', generateShades(hex));
+        // توليد اللون المكمل
+        renderGrid('compGrid', [hex, getComplementary(hex)]);
+        // توليد باليتة معمارية (اللون + رماديات وترابيات)
+        renderGrid('moodGrid', [hex, '#f4f1ea', '#d7d1c9', '#5d5c58', '#2d2d2d']);
+    }
+
+    function renderGrid(id, colors) {
+        const grid = document.getElementById(id);
+        grid.innerHTML = '';
+        colors.forEach(col => {
+            const div = document.createElement('div');
+            div.className = 'color-swatch';
+            div.style.backgroundColor = col;
+            div.innerHTML = `<span class="hex-label">${col.toUpperCase()}</span>`;
+            div.onclick = () => {
+                navigator.clipboard.writeText(col);
+                if (navigator.vibrate) navigator.vibrate(30);
+            };
+            grid.appendChild(div);
+        });
+    }
+
+    function generateShades(hex) {
+        // تبسيط لتوليد 5 درجات
+        return [adjust(hex, 40), adjust(hex, 20), hex, adjust(hex, -20), adjust(hex, -40)];
+    }
+
+    function adjust(hex, percent) {
+        let num = parseInt(hex.replace("#",""),16),
+            amt = Math.round(2.55 * percent),
+            R = (num >> 16) + amt, G = (num >> 8 & 0x00FF) + amt, B = (num & 0x0000FF) + amt;
+        return "#" + (0x1000000 + (R<255?R<0?0:R:255)*0x10000 + (G<255?G<0?0:G:255)*0x100 + (B<255?B<0?0:B:255)).toString(16).slice(1);
+    }
+
+    function getComplementary(hex) {
+        let rgb = parseInt(hex.replace("#",""), 16);
+        let comp = 0xFFFFFF ^ rgb;
+        return "#" + comp.toString(16).padStart(6, '0');
+    }
+
+    baseInput.addEventListener('input', generatePalette);
+    generatePalette();
+</script>
+
+</body>
+</html>

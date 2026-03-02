@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>حاسبة المساحات المعقدة</title>
+    <style>
+        :root { --primary: #2c3e50; --gold: #d4af37; --bg: #fdfdfd; }
+        body { font-family: sans-serif; margin: 0; background: var(--bg); touch-action: none; overflow: hidden; }
+        #ui-layer { position: fixed; top: 15px; left: 15px; right: 15px; z-index: 10; pointer-events: none; }
+        .card { background: white; padding: 15px; border-radius: 15px; box-shadow: 0 5px 20px rgba(0,0,0,0.1); pointer-events: auto; }
+        .controls { display: flex; gap: 8px; margin-top: 10px; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; font-size: 0.9rem; }
+        .reset-btn { background: #e74c3c; color: white; }
+        .calc-btn { background: var(--primary); color: white; }
+        .info-text { font-size: 0.85rem; color: #555; text-align: center; }
+        #canvas { background: #eee; background-image: radial-gradient(#ccc 1px, transparent 1px); background-size: 20px 20px; }
+        .stats { font-size: 1.2rem; font-weight: bold; color: var(--gold); text-align: center; margin: 5px 0; }
+    </style>
+</head>
+<body>
+
+<div id="ui-layer">
+    <div class="card">
+        <div class="info-text">اضغط على الشاشة لتحديد زوايا الشكل (الأرض)</div>
+        <div id="areaResult" class="stats">المساحة: 0 م²</div>
+        <div class="controls">
+            <button class="reset-btn" onclick="resetPoints()">مسح النقاط</button>
+            <button class="calc-btn" onclick="copyResult()">نسخ النتيجة</button>
+        </div>
+    </div>
+</div>
+
+<canvas id="canvas"></canvas>
+
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    let points = [];
+    const pixelsToMeter = 20; // كل 20 بكسل تعادل 1 متر (افتراضياً)
+
+    function resize() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        draw();
+    }
+
+    window.addEventListener('resize', resize);
+    resize();
+
+    canvas.addEventListener('click', (e) => {
+        points.push({ x: e.clientX, y: e.clientY });
+        if (navigator.vibrate) navigator.vibrate(30);
+        draw();
+        calculateArea();
+    });
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        if (points.length === 0) return;
+
+        ctx.beginPath();
+        ctx.moveTo(points[0].x, points[0].y);
+        ctx.strokeStyle = '#2c3e50';
+        ctx.lineWidth = 2;
+
+        points.forEach((p, i) => {
+            ctx.lineTo(p.x, p.y);
+            // رسم نقطة عند كل زاوية
+            ctx.fillStyle = '#d4af37';
+            ctx.fillRect(p.x-4, p.y-4, 8, 8);
+        });
+
+        if (points.length > 2) {
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(212, 175, 55, 0.2)';
+            ctx.fill();
+        }
+        ctx.stroke();
+    }
+
+    function calculateArea() {
+        if (points.length < 3) return;
+        
+        let area = 0;
+        for (let i = 0; i < points.length; i++) {
+            let j = (i + 1) % points.length;
+            area += points[i].x * points[j].y;
+            area -= points[j].x * points[i].y;
+        }
+        
+        // تحويل من بكسل مربع إلى متر مربع
+        const finalArea = Math.abs(area / 2) / (pixelsToMeter * pixelsToMeter);
+        document.getElementById('areaResult').innerText = `المساحة: ${finalArea.toFixed(2)} م²`;
+    }
+
+    function resetPoints() {
+        points = [];
+        document.getElementById('areaResult').innerText = `المساحة: 0 م²`;
+        draw();
+    }
+
+    function copyResult() {
+        const text = document.getElementById('areaResult').innerText;
+        navigator.clipboard.writeText(text);
+        alert('تم نسخ النتيجة');
+    }
+</script>
+
+</body>
+</html>
